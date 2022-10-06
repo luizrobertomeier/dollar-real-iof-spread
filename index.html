@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Luiz Meier">
+    <meta name="description" content="Calcula o valor aproximado a pagar em Reais por um serviço ou produto em dólar">
+    <title>Dollar Real IOF Spread</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script>
+        function getDollar() {
+            var url = "https://economia.awesomeapi.com.br/last/USD-BRL";
+            // var url = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='2021-10-06'&$top=100&$format=json&$select=cotacaoCompra,cotacaoVenda,dataHoraCotacao";
+            var request = new XMLHttpRequest();
+            request.open("GET", url, true);
+            request.onload = function () {
+                var data = JSON.parse(this.response);
+                if (request.status >= 200 && request.status < 400) {
+                    var dollar = data.USDBRL.bid;
+                    document.getElementById("dollarNow").value = dollar;
+                    calculate()
+                } else {
+                    console.log('error');
+                }
+            }
+            request.send();
+        }
+
+        function calculate(){
+            var dollarAmount = document.getElementById("dollarAmount").value;
+            var dollarNow = document.getElementById("dollarNow").value;
+            const convert = dollarAmount * dollarNow;
+            var iof = convert * document.getElementById("iof").value / 100;
+            var spread = convert * document.getElementById("spread").value / 100;
+            var result = convert + iof + spread;
+            document.getElementById("result").innerHTML = "Total em R$" + result.toFixed(2);
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 1.45;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+    </style>
+
+</head>
+<body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            getDollar();
+            const iof = 6.38;
+            const spread = 4.0;
+            document.getElementById("iof").value = iof;
+            document.getElementById("spread").value = spread;
+        });
+    </script>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>Dollar Real IOF Spread</h1>
+                <h5>Digite o valor em dólar para calcular o valor final da compra em Reais</h5>
+                <p style="font-size:small">Observação: O valor é <i>aproximado</i> e outras taxas poderão ser aplicadas pelo banco/serviço</p>
+                <div class="input-group">
+                    <span class="input-group-text">Quantia em Dólar</span>
+                    <input type="number" class="form-control" id="dollarAmount" placeholder="Quantia em Dólar, exemplo: 10.00" value="10" onkeyup="calculate()">
+                </div>
+                <div class="row">
+                    <div class="col-10">
+                        <div class="input-group">
+                            <span class="input-group-text">Valor do Dólar (atualizado)</span>
+                            <input type="number" class="form-control" id="dollarNow" placeholder="Valor do Dólar" onkeyup="calculate()">
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" type="button" onclick="getDollar()">Atualizar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text">Valor do IOF (em %)</span>
+                    <input type="number" class="form-control" id="iof" placeholder="Valor do IOF (em %)" onkeyup="calculate()">
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text">Valor do spread (Nubank) (em %)</span>
+                    <input type="number" class="form-control" id="spread" placeholder="Valor do spread (Nubank) (em %)" onkeyup="calculate()">
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="h-100 d-flex align-items-center justify-content-center">
+            <h2 id="result">Total em R$</h2>
+        </div>
+        <br>
+        <a href="https://blog.nelogica.com.br/spread-bid-entenda-seus-conceitos-e-funcionamento-no-mercado-financeiro/" target="_blank">Spread bid-ask: entenda esse conceito de mercado!</a>
+        <br>
+        <a href="https://blog.nubank.com.br/iof-tudo-sobre/" target="_blank">O que é IOF e como funciona o Imposto sobre Operações Financeiras?</a>
+    </div>
+</body>
+</html>
